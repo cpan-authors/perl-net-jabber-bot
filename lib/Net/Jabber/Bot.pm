@@ -899,8 +899,13 @@ sub get_safety_mode {
 =item B<SendGroupMessage>
 
     $bot->SendGroupMessage($name, $message);
+    $bot->SendGroupMessage($name, $message, $from);
 
-Tells the bot to send a message to the recipient room name
+Tells the bot to send a message to the recipient room name.
+
+$from is an optional JID to set as the sender of the message.
+Note that most XMPP servers will not allow spoofing the from field
+and may reject the message or disconnect the client.
 
 =cut
 
@@ -908,19 +913,25 @@ sub SendGroupMessage {
     my $self      = shift;
     my $recipient = shift;
     my $message   = shift;
+    my $from      = shift;
 
     $recipient .= '@' . $self->conference_server if ( $recipient !~ m{\@} );
 
-    return $self->SendJabberMessage( $recipient, $message, 'groupchat' );
+    return $self->SendJabberMessage( $recipient, $message, 'groupchat', undef, $from );
 }
 
 =item B<SendPersonalMessage>
 
     $bot->SendPersonalMessage($recipient, $message);
+    $bot->SendPersonalMessage($recipient, $message, $from);
 
 How to send an individual message to someone.
 
 $recipient must read as user@server/Resource or it will not send.
+
+$from is an optional JID to set as the sender of the message.
+Note that most XMPP servers will not allow spoofing the from field
+and may reject the message or disconnect the client.
 
 =cut
 
@@ -928,13 +939,14 @@ sub SendPersonalMessage {
     my $self      = shift;
     my $recipient = shift;
     my $message   = shift;
+    my $from      = shift;
 
-    return $self->SendJabberMessage( $recipient, $message, 'chat' );
+    return $self->SendJabberMessage( $recipient, $message, 'chat', undef, $from );
 }
 
 =item B<SendJabberMessage>
 
-    $bot->SendJabberMessage($recipient, $message, $message_type, $subject);
+    $bot->SendJabberMessage($recipient, $message, $message_type, $subject, $from);
 
 The master subroutine to send a message. Called either by the user, SendPersonalMessage, or SendGroupMessage. Sometimes there
 is call to call it directly when you do not feel like figuring you messaged you.
@@ -954,6 +966,7 @@ sub SendJabberMessage {
     my $message      = shift;
     my $message_type = shift;
     my $subject      = shift;
+    my $from         = shift;
 
     my $max_size = $self->max_message_size;
 
@@ -964,7 +977,7 @@ sub SendJabberMessage {
     DEBUG("Max message = $max_size. Splitting...") if ( $#message_chunks > 0 );
     my $return_value;
     foreach my $message_chunk (@message_chunks) {
-        my $msg_return = $self->_send_individual_message( $recipient, $message_chunk, $message_type, $subject );
+        my $msg_return = $self->_send_individual_message( $recipient, $message_chunk, $message_type, $subject, $from );
         if ( defined $msg_return ) {
             $return_value .= $msg_return;
         }
@@ -986,6 +999,7 @@ sub _send_individual_message {
     my $message_chunk = shift;
     my $message_type  = shift;
     my $subject       = shift;
+    my $from          = shift;
 
     if ( !defined $message_type ) {
         ERROR("Undefined \$message_type");
@@ -1028,13 +1042,14 @@ sub _send_individual_message {
 
     my $message_length = length($message_chunk);
     DEBUG("Sending message $yday-$hour-$messages_this_hour $message_length bytes to $recipient");
-    $self->jabber_client->MessageSend(
-        to => $recipient, body => $message_chunk
-        , type => $message_type
-
-          #                     , from => $connection_hash{$obj_ID}{'from_full'}
-        , subject => $subject
+    my %message_args = (
+        to      => $recipient,
+        body    => $message_chunk,
+        type    => $message_type,
+        subject => $subject,
     );
+    $message_args{from} = $from if defined $from;
+    $self->jabber_client->MessageSend(%message_args);
 
     DEBUG( "Sleeping " . $self->message_delay . " after sending message." );
     Time::HiRes::sleep $self->message_delay;    #Throttle messages.
