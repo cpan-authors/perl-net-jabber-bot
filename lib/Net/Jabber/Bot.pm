@@ -566,9 +566,11 @@ sub ReconnectToServer {
         INFO("Sleeping $sleep_time before attempting re-connect");
         sleep $sleep_time;
         $sleep_time *= 2 if ( $sleep_time < 300 );
-        $self->InitJabber();
-        INFO("Running background routine.");
-        &$background_subroutine( $self, 0 );    # call background proc so we can check for errors while down.
+        $self->_init_jabber();
+        if ( defined $background_subroutine ) {
+            INFO("Running background routine.");
+            &$background_subroutine( $self, 0 );    # call background proc so we can check for errors while down.
+        }
     }
 }
 
@@ -1003,7 +1005,8 @@ sub _send_individual_message {
         $subject       = "" if ( !defined $subject );          # Keep warning messages quiet.
         $message_chunk = "" if ( !defined $message_chunk );    # Keep warning messages quiet.
 
-        ERROR( "Can't Send message because we've already tried to send $messages_this_hour of $self->max_messages_per_hour messages this hour.\n" . "To: $recipient\n" . "Subject: $subject\n" . "Type: $message_type\n" . "Message sent:\n" . "$message_chunk" );
+        my $max_per_hour = $self->max_messages_per_hour;
+        ERROR( "Can't send message because we've already tried to send $messages_this_hour of $max_per_hour messages this hour.\n" . "To: $recipient\n" . "Subject: $subject\n" . "Type: $message_type\n" . "Message sent:\n" . "$message_chunk" );
 
         # Send 1 panic message out to jabber if this is our last message before quieting down.
         return "Too many messages ($messages_this_hour)\n";
@@ -1013,7 +1016,7 @@ sub _send_individual_message {
         $subject       = "" if ( !defined $subject );          # Keep warning messages quiet.
         $message_chunk = "" if ( !defined $message_chunk );    # Keep warning messages quiet.
 
-        ERROR( "Can't Jabber server is down. Tried to send: \n" . "To: $recipient\n" . "Subject: $subject\n" . "Type: $message_type\n" . "Message sent:\n" . "$message_chunk" );
+        ERROR( "Can't send: Jabber server is down. Tried to send: \n" . "To: $recipient\n" . "Subject: $subject\n" . "Type: $message_type\n" . "Message sent:\n" . "$message_chunk" );
 
         # Send 1 panic message out to jabber if this is our last message before quieting down.
         return "Server is down.\n";
@@ -1065,7 +1068,7 @@ sub SetForumSubject {
     if ( length $subject > $self->max_message_size ) {
         my $subject_len = length($subject);
         ERROR("Someone tried to send a subject message $subject_len bytes long!");
-        my $subject = substr( $subject, 0, $self->max_message_size );
+        $subject = substr( $subject, 0, $self->max_message_size );
         DEBUG("Truncated subject: $subject");
         return "Subject is too long!";
     }
