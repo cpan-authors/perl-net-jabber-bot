@@ -938,8 +938,10 @@ The master subroutine to send a message. Called either by the user, SendPersonal
 is call to call it directly when you do not feel like figuring you messaged you.
 Assures message size does not exceed a limit and chops it into pieces if need be.
 
-NOTE: non-printable characters (unicode included) will be stripped before sending to the server via:
-    s/[^[:print:]]+/./xmsg
+NOTE: non-printable characters (unicode included) will be replaced with a dot before sending to the server.
+Newlines (LF and CR) are preserved so that multiline messages work correctly.
+
+    s/[^\r\n[:print:]]+/./xmsg
 
 =cut
 
