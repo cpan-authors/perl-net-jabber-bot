@@ -384,7 +384,9 @@ sub _callback_maker {
 sub _init_jabber {
     my $self = shift;
 
-    # Autocreate the jabber object (see has jabber_client)
+    # Create a new client if we don't have one (e.g., after disconnect/reconnect)
+    $self->jabber_client( Net::Jabber::Client->new ) if !defined $self->jabber_client;
+
     my $connection = $self->jabber_client;
 
     DEBUG("Set the call backs.");
@@ -616,8 +618,7 @@ Reports connect state (true/false) based on the status of client_start_time.
 sub IsConnected {
     my $self = shift;
 
-    DEBUG( "REF = " . ref( $self->jabber_client ) );
-    return $self->connect_time;
+    return defined $self->jabber_client;
 }
 
 # TODO: ***NEED VERY GOOD DOCUMENTATION HERE*****
@@ -1024,6 +1025,12 @@ sub _send_individual_message {
 
     my $yday = (localtime)[7];
     my $hour = (localtime)[2];
+
+    # Clean up entries from previous days to prevent unbounded memory growth
+    for my $old_day ( keys %{ $self->messages_sent_today } ) {
+        delete $self->messages_sent_today->{$old_day} if $old_day != $yday;
+    }
+
     my $messages_this_hour = $self->messages_sent_today->{$yday}->{$hour} += 1;
 
     if ( $messages_this_hour > $self->max_messages_per_hour ) {

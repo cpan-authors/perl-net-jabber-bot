@@ -110,7 +110,7 @@ sub MUCJoin {; }
 
 sub Disconnect {
     my $self = shift;
-    $self->{is_connected} = 1;
+    $self->{is_connected} = 0;
 }
 
 sub Send {;} # Used for IQ. need to see if we need to put something here.
@@ -119,5 +119,7 @@ sub Subscription {;} # Used to process JabberPresenceMessages we don't really us
 sub RosterGet {;}
 sub PresenceDB {;}
 sub PresenceDBParse{;}
+sub RosterDB {;}
+sub RosterRequest {;}
 
 1;
