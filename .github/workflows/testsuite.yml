@@ -94,6 +94,7 @@ jobs:
         with:
           sudo: false
           cpanfile: "cpanfile"
+          args: "--notest"
       - run: perl Makefile.PL
       - run: make
       - run: make test
