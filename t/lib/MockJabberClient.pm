@@ -117,6 +117,9 @@ sub Send {;} # Used for IQ. need to see if we need to put something here.
 
 sub Subscription {;} # Used to process JabberPresenceMessages we don't really use this data at the moment.
 sub RosterGet {;}
+sub RosterDB {;}
+sub RosterRequest {;}
+sub RosterDBJIDs { return (); }
 sub PresenceDB {;}
 sub PresenceDBParse{;}
 
