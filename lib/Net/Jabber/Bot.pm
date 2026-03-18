@@ -403,7 +403,7 @@ sub _init_jabber {
     }
 
     DEBUG( "Logging in... as user " . $self->username . " / " . $self->resource );
-    DEBUG( "PW: " . $self->password );
+    DEBUG( "PW: ********" );
 
     # Moved into connect hash via 'componentname'
     #    my $sid = $connection->{SESSION}->{id};
@@ -647,7 +647,7 @@ sub _process_jabber_message {
     if ( $self->connect_time > $time_now - $grace_period
         || ( defined $self->forum_join_time->{$from} && $self->forum_join_time->{$from} > $time_now - $grace_period ) ) {
         my $cond1 = $self->connect_time . " > $time_now - $grace_period";
-        my $cond2 = $self->forum_join_time->{$from} || 'undef' . " > $time_now - $grace_period";
+        my $cond2 = ($self->forum_join_time->{$from} || 'undef') . " > $time_now - $grace_period";
         DEBUG("Ignoring messages cause I'm in startup for forum $from\n$cond1\n$cond2");
         return;    # Ignore messages the first few seconds.
     }
