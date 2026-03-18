@@ -15,8 +15,9 @@ my %WriteMakefileArgs = (
     },
     PREREQ_PM => {
         'Log::Log4perl' => 0,
-        'Moose'         => 0.82,
-        'MooseX::Types' => 0.12,
+        'Moo'             => 2,
+        'Type::Tiny'      => 1,
+        'Types::Standard' => 0,
         'Mozilla::CA'   => 0,
         'Net::Jabber'   => 2.0,
         'Sys::Hostname'  => 0,

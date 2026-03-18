@@ -2,7 +2,7 @@
 
 ## What is this
 
-Net::Jabber::Bot is a Perl module for creating automated XMPP/Jabber bots with built-in safety features (message rate limiting, flood protection, reconnection handling). Built on Moose and Net::Jabber.
+Net::Jabber::Bot is a Perl module for creating automated XMPP/Jabber bots with built-in safety features (message rate limiting, flood protection, reconnection handling). Built on Moo and Net::Jabber.
 
 ## Build and test
 
@@ -22,7 +22,7 @@ Install runtime deps:
 cpanm --installdeps .
 ```
 
-Key deps: Moose, MooseX::Types, Net::Jabber, Log::Log4perl, Mozilla::CA
+Key deps: Moo, Type::Tiny, Types::Standard, Net::Jabber, Log::Log4perl, Mozilla::CA
 
 ## Project structure
 
@@ -39,7 +39,7 @@ Key deps: Moose, MooseX::Types, Net::Jabber, Log::Log4perl, Mozilla::CA
 
 ## Code patterns
 
-- Moose-based class with `MooseX::Types` custom types
+- Moo-based class with `Type::Tiny` / `Types::Standard` custom types
 - Public API uses CamelCase: `SendGroupMessage`, `JoinForum`, `ReconnectToServer`
 - Private methods use underscore prefix: `_init_jabber`, `_process_jabber_message`
 - Log4perl for logging: `DEBUG()`, `INFO()`, `WARN()`, `ERROR()`

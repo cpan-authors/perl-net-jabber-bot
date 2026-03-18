@@ -1,10 +1,8 @@
 package Net::Jabber::Bot;
 
-use Moose;
-use MooseX::Types -declare => [qw( JabberClientObject PosInt PosNum HundredInt )];
-
-# import builtin types
-use MooseX::Types::Moose qw/Int HashRef Str Maybe ArrayRef Bool CodeRef Object Num/;
+use Moo;
+use Types::Standard qw(Int HashRef Str Maybe ArrayRef Bool CodeRef InstanceOf Num);
+use Type::Tiny;
 
 use version;
 use Net::Jabber;
@@ -13,45 +11,42 @@ use Sys::Hostname;
 use Log::Log4perl qw(:easy);
 use Mozilla::CA;
 
-coerce Bool, from Str,
-  via { ( $_ =~ m/(^on$)|(^true$)/i ) + 0 };    # True if it's on or true. Otherwise false.
+my $PosInt     = Type::Tiny->new( name => 'PosInt',     parent => Int, constraint => sub { $_ > 0 } );
+my $PosNum     = Type::Tiny->new( name => 'PosNum',     parent => Num, constraint => sub { $_ > 0 } );
+my $HundredInt = Type::Tiny->new( name => 'HundredInt', parent => Num, constraint => sub { $_ > 100 } );
 
-subtype JabberClientObject, as Object, where { $_->isa('Net::Jabber::Client') };
-
-subtype PosInt,     as Int, where { $_ > 0 };
-subtype PosNum,     as Num, where { $_ > 0 };
-subtype HundredInt, as Num, where { $_ > 100 };
+my $CoercedBool = Bool->plus_coercions( Str, sub { ( $_ =~ m/(^on$)|(^true$)/i ) + 0 } );
 
 has jabber_client => (
-    isa     => Maybe [JabberClientObject],
+    isa     => Maybe [ InstanceOf ['Net::Jabber::Client'] ],
     is      => 'rw',
     default => sub { Net::Jabber::Client->new }
 );
 
 #my %connection_hash : ATTR; # Keep track of connection options fed to client.
 
-has 'client_session_id' => ( isa => Str,    is   => 'rw' );
-has 'connect_time'      => ( isa => PosInt, is   => 'rw', default => 9_999_999_999 );
-has 'forum_join_grace'  => ( isa => PosNum, is   => 'rw', default => 10 );
-has 'server_host'       => ( isa => Str,    is   => 'rw', lazy    => 1, default => sub { shift->server } );
-has 'server'            => ( isa => Str,    is   => 'rw' );
-has 'port'              => ( isa => PosInt, is   => 'rw', default => 5222 );
-has 'gtalk'             => ( isa => Bool,   is   => 'rw', default => '0' );
-has 'tls'               => ( isa => Bool,   is   => 'rw', default => '0' );
-has 'ssl_ca_path'       => ( isa => Str,    is   => 'rw', default => Mozilla::CA::SSL_ca_file() );
-has 'ssl_verify'        => ( isa => Bool,   is   => 'rw', default => '1' );
-has 'connection_type'   => ( isa => Str,    is   => 'rw', default => 'tcpip' );
-has 'conference_server' => ( isa => Str,    is   => 'rw' );
-has 'username'          => ( isa => Str,    is   => 'rw' );
-has 'password'          => ( isa => Str,    is   => 'rw' );
-has 'alias'             => ( isa => Str,    lazy => 1, is => 'rw', default => 'net_jabber_bot' );
+has 'client_session_id' => ( isa => Str,      is   => 'rw' );
+has 'connect_time'      => ( isa => $PosInt,  is   => 'rw', default => 9_999_999_999 );
+has 'forum_join_grace'  => ( isa => $PosNum,  is   => 'rw', default => 10 );
+has 'server_host'       => ( isa => Str,      is   => 'rw', lazy    => 1, default => sub { shift->server } );
+has 'server'            => ( isa => Str,      is   => 'rw' );
+has 'port'              => ( isa => $PosInt,  is   => 'rw', default => 5222 );
+has 'gtalk'             => ( isa => Bool,     is   => 'rw', default => '0' );
+has 'tls'               => ( isa => Bool,     is   => 'rw', default => '0' );
+has 'ssl_ca_path'       => ( isa => Str,      is   => 'rw', default => Mozilla::CA::SSL_ca_file() );
+has 'ssl_verify'        => ( isa => Bool,     is   => 'rw', default => '1' );
+has 'connection_type'   => ( isa => Str,      is   => 'rw', default => 'tcpip' );
+has 'conference_server' => ( isa => Str,      is   => 'rw' );
+has 'username'          => ( isa => Str,      is   => 'rw' );
+has 'password'          => ( isa => Str,      is   => 'rw' );
+has 'alias'             => ( isa => Str,      lazy => 1, is => 'rw', default => 'net_jabber_bot' );
 
 # Resource defaults to alias_hostname_pid
 has 'resource'            => ( isa => Str, lazy => 1, is => 'rw', default => sub { shift->alias . "_" . hostname . "_" . $$ } );
 has 'message_function'    => ( isa => Maybe [CodeRef], is => 'rw', default => sub { undef } );
 has 'background_function' => ( isa => Maybe [CodeRef], is => 'rw', default => sub { undef } );
-has 'loop_sleep_time'     => ( isa => PosNum, is => 'rw', default => 5 );
-has 'process_timeout'     => ( isa => PosNum, is => 'rw', default => 5 );
+has 'loop_sleep_time'     => ( isa => $PosNum, is => 'rw', default => 5 );
+has 'process_timeout'     => ( isa => $PosNum, is => 'rw', default => 5 );
 has 'from_full'           => (
     isa     => Str,
     lazy    => 1,
@@ -62,21 +57,21 @@ has 'from_full'           => (
     }
 );
 
-has 'safety_mode'             => ( isa => Bool, is => 'rw', default => 1, coerce => 1 );
-has 'ignore_server_messages'  => ( isa => Bool, is => 'rw', default => 1, coerce => 1 );
-has 'ignore_self_messages'    => ( isa => Bool, is => 'rw', default => 1, coerce => 1 );
-has 'auto_subscribe'          => ( isa => Bool, is => 'rw', default => 1, coerce => 1 );
+has 'safety_mode'             => ( isa => $CoercedBool, is => 'rw', default => 1, coerce => 1 );
+has 'ignore_server_messages'  => ( isa => $CoercedBool, is => 'rw', default => 1, coerce => 1 );
+has 'ignore_self_messages'    => ( isa => $CoercedBool, is => 'rw', default => 1, coerce => 1 );
+has 'auto_subscribe'          => ( isa => $CoercedBool, is => 'rw', default => 1, coerce => 1 );
 has 'forums_and_responses'    => ( isa => HashRef [ ArrayRef [Str] ], is => 'rw' );              # List of forums we're in and the strings we monitor for.
 has 'forum_join_time'         => ( isa => HashRef [Int], is => 'rw', default => sub { {} } );    # List of when we joined each forum
-has 'out_messages_per_second' => ( isa => PosNum, is => 'rw', default => sub { 5 } );
-has 'message_delay'           => ( isa => PosNum, is => 'rw', default => sub { 1 / 5 } );
+has 'out_messages_per_second' => ( isa => $PosNum, is => 'rw', default => sub { 5 } );
+has 'message_delay'           => ( isa => $PosNum, is => 'rw', default => sub { 1 / 5 } );
 
-has 'max_message_size'      => ( isa => HundredInt, is => 'rw', default => 1000000 );
-has 'max_messages_per_hour' => ( isa => PosInt,     is => 'rw', default => 1000000 );
+has 'max_message_size'      => ( isa => $HundredInt, is => 'rw', default => 1000000 );
+has 'max_messages_per_hour' => ( isa => $PosInt,     is => 'rw', default => 1000000 );
 
 # Initialize this hour's message count.
 has 'messages_sent_today' => (
-    isa     => 'HashRef',
+    isa     => HashRef,
     is      => 'ro',
     default => sub {
         { (localtime)[7] => { (localtime)[2] => 0 } }
@@ -113,7 +108,7 @@ our $VERSION = '2.1.7';
 =head1 SYNOPSIS
 
 Program design:
-This is a Moose based Class.
+This is a Moo based Class.
 
 The idea behind the module is that someone creating a bot should not really have to know a whole lot about how the Jabber protocol works in order to use it. It also allows us to abstract away all the things that can get a bot maker into trouble. Essentially the object helps protect the coders from their own mistakes.
 
@@ -1258,7 +1253,4 @@ under the same terms as Perl itself.
 
 =cut
 
-__PACKAGE__->meta->make_immutable;
-no Moose;
-no MooseX::Types;
 1;    # End of Net::Jabber::Bot
