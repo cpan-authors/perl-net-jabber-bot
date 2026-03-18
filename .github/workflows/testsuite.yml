@@ -83,16 +83,14 @@ jobs:
         perl-version: ${{ fromJson (needs.perl-versions.outputs.perl-versions) }}
 
     container:
-      image: perl:${{ matrix.perl-version }}
+      image: perldocker/perl-tester:${{ matrix.perl-version }}
 
     steps:
       - uses: actions/checkout@v4
       - name: perl -V
         run: perl -V
       - name: Install Dependencies
-        run: |
-          cpanm --notest --force Net::XMPP
-          cpanm --notest Net::Jabber Log::Log4perl Moose MooseX::Types Mozilla::CA Sys::Hostname Time::HiRes version Test::More Test::NoWarnings Test::Pod Test::Pod::Coverage
+        run: cpanm --notest Net::Jabber Log::Log4perl Moose MooseX::Types Mozilla::CA Sys::Hostname Time::HiRes version Test::More Test::NoWarnings Test::Pod Test::Pod::Coverage
       - run: perl Makefile.PL
       - run: make
       - run: make test
