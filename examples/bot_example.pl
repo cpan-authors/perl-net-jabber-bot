@@ -361,7 +361,7 @@ Bot code to show how to use the bot
 
 =head1 AUTHOR
 
-Todd Rinaldo, Robert Boone, Wade Johnson
+Todd Rinaldo
 
 =head1 BUGS
 
