@@ -339,7 +339,7 @@ sub BUILD {
           if ( !$self->background_function && $params->{background_activity} );
         $self->message_function( $params->{message_callback} )
           if ( !$self->message_function && $params->{message_callback} );
-        sleep 30;
+        # sleep removed — the warning above is sufficient to alert developers
     }
 
     # GTalk convenience: auto-configure TLS and server_host for Google Talk
