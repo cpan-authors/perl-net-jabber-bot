@@ -122,6 +122,8 @@ sub RosterRequest {;}
 sub RosterDBJIDs { return (); }
 sub PresenceDB {;}
 sub PresenceDBParse{;}
+
+no warnings 'redefine';
 sub RosterDB {;}
 sub RosterRequest {;}
 
