@@ -7,7 +7,20 @@ use MooseX::Types -declare => [qw( JabberClientObject PosInt PosNum HundredInt )
 use MooseX::Types::Moose qw/Int HashRef Str Maybe ArrayRef Bool CodeRef Object Num/;
 
 use version;
-use Net::Jabber;
+
+# XML::Stream::Parser has a !$x == 1 precedence bug that warns on perl 5.42+.
+# Suppress the compile-time warning from the dependency until it is fixed upstream.
+BEGIN {
+    my $orig = $SIG{__WARN__};
+    $SIG{__WARN__} = sub {
+        my $w = $_[0];
+        return if $w =~ /Possible precedence problem.*XML.Stream.Parser/;
+        $orig ? $orig->(@_) : CORE::warn($w);
+    };
+    require Net::Jabber;
+    Net::Jabber->import();
+    if ($orig) { $SIG{__WARN__} = $orig } else { delete $SIG{__WARN__} }
+}
 use Time::HiRes;
 use Sys::Hostname;
 use Log::Log4perl qw(:easy);
