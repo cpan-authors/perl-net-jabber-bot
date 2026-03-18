@@ -36,6 +36,7 @@ has 'forum_join_grace'  => ( isa => PosNum, is   => 'rw', default => 10 );
 has 'server_host'       => ( isa => Str,    is   => 'rw', lazy    => 1, default => sub { shift->server } );
 has 'server'            => ( isa => Str,    is   => 'rw' );
 has 'port'              => ( isa => PosInt, is   => 'rw', default => 5222 );
+has 'gtalk'             => ( isa => Bool,   is   => 'rw', default => '0' );
 has 'tls'               => ( isa => Bool,   is   => 'rw', default => '0' );
 has 'ssl_ca_path'       => ( isa => Str,    is   => 'rw', default => Mozilla::CA::SSL_ca_file() );
 has 'ssl_verify'        => ( isa => Bool,   is   => 'rw', default => '1' );
@@ -57,7 +58,7 @@ has 'from_full'           => (
     is      => 'rw',
     default => sub {
         my $self = shift;
-        $self->username || '' . '@' . $self->server || '' . '/' . $self->alias || '';
+        ($self->username || '') . '@' . ($self->server || '') . '/' . ($self->alias || '');
     }
 );
 
@@ -223,6 +224,10 @@ Conference server (usually conference.$server_name)
 
 Defaults to 5222
 
+=item B<gtalk>
+
+Boolean value. defaults to 0. Set to 1 for Google Talk connections. This automatically enables TLS and sets server_host to 'gmail.com' (unless you provide your own server_host).
+
 =item B<tls>
 
 Boolean value. defaults to 0. for google, it is know that this value must be 1 to work.
@@ -335,6 +340,12 @@ sub BUILD {
         $self->message_function( $params->{message_callback} )
           if ( !$self->message_function && $params->{message_callback} );
         sleep 30;
+    }
+
+    # GTalk convenience: auto-configure TLS and server_host for Google Talk
+    if ( $self->gtalk ) {
+        $self->tls(1);
+        $self->server_host('gmail.com') if ( !$params->{server_host} );
     }
 
     # Message delay is inverse of out_messages_per_second
