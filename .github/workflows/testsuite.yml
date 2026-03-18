@@ -94,7 +94,7 @@ jobs:
           cpanm --notest Authen::SASL XML::Stream Module::Build
           curl -sL https://cpan.metacpan.org/authors/id/D/DA/DAPATRICK/Net-XMPP-1.05.tar.gz | tar xz
           cd Net-XMPP-1.05
-          perl -pi -e "s/'LWP::Online'.*?,?//" Build.PL
+          perl -ni -e "print unless /LWP::Online/" Build.PL
           perl Build.PL && ./Build && ./Build install
           cd .. && rm -rf Net-XMPP-1.05
       - name: Install Dependencies
