@@ -90,18 +90,9 @@ jobs:
       - name: perl -V
         run: perl -V
       - name: Install Dependencies
-        run: >
-          cpanm --notest
-          Module::Install
-          Log::Log4perl
-          Moose MooseX::Types
-          Mozilla::CA
-          Net::Jabber
-          Sys::Hostname
-          Time::HiRes
-          version
-          Test::More Test::NoWarnings
-          Test::Pod Test::Pod::Coverage
+        run: |
+          cpanm --notest --force Net::Jabber
+          cpanm --notest Log::Log4perl Moose MooseX::Types Mozilla::CA Sys::Hostname Time::HiRes version Test::More Test::NoWarnings Test::Pod Test::Pod::Coverage
       - run: perl Makefile.PL
       - run: make
       - run: make test
