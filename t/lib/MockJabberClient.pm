@@ -119,6 +119,8 @@ sub Subscription {;} # Used to process JabberPresenceMessages we don't really us
 sub RosterGet {;}
 sub PresenceDB {;}
 sub PresenceDBParse{;}
+
+no warnings 'redefine';
 sub RosterDB {;}
 sub RosterRequest {;}
 
