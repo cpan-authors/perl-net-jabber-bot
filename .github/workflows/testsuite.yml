@@ -89,6 +89,14 @@ jobs:
       - uses: actions/checkout@v4
       - name: perl -V
         run: perl -V
+      - name: Install Net::XMPP (patch out broken LWP::Online dep)
+        run: |
+          cpanm --notest Authen::SASL XML::Stream Module::Build
+          curl -sL https://cpan.metacpan.org/authors/id/D/DA/DAPATRICK/Net-XMPP-1.05.tar.gz | tar xz
+          cd Net-XMPP-1.05
+          perl -pi -e "s/'LWP::Online'.*?,?//" Build.PL
+          perl Build.PL && ./Build && ./Build install
+          cd .. && rm -rf Net-XMPP-1.05
       - name: Install Dependencies
         run: cpanm --notest Net::Jabber Log::Log4perl Moose MooseX::Types Mozilla::CA Sys::Hostname Time::HiRes version Test::More Test::NoWarnings Test::Pod Test::Pod::Coverage
       - run: perl Makefile.PL
