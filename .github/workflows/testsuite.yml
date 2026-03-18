@@ -63,7 +63,7 @@ jobs:
       - id: action
         uses: perl-actions/perl-versions@v1
         with:
-          since-perl: 5.22
+          since-perl: 5.10
           with-devel: true
 
   linux:
