@@ -204,7 +204,7 @@ The following initialization variables can be passed. Only marked variables are 
 
     safety_mode = (1,0)
 
-Determines if the bot safety features are turned on and enforced. This mode is on by default. Many of the safety features are here to assure you do not crash your favorite jabber server with floods, etc. DO NOT turn it off unless you're sure you know what you're doing (not just Sledge Hammer ceratin)
+Determines if the bot safety features are turned on and enforced. This mode is on by default. Many of the safety features are here to assure you do not crash your favorite jabber server with floods, etc. DO NOT turn it off unless you're sure you know what you're doing (not just Sledge Hammer certain)
 
 =item B<server>
 
@@ -217,7 +217,7 @@ This is where the bot initially connects. For google for instance, you should se
 
 =item B<conference_server>
 
-conferencee server (usually conference.$server_name)
+Conference server (usually conference.$server_name)
 
 =item B<port>
 
@@ -268,7 +268,7 @@ example1:
 
 =item B<message_function>
 
-The subroutine the bot will call when a new message is recieved by the bot. Only called if the bot's logic decides it's something you need to know about.
+The subroutine the bot will call when a new message is received by the bot. Only called if the bot's logic decides it's something you need to know about.
 
 =item B<background_function>
 
@@ -861,7 +861,7 @@ sub respond_to_self_messages {
 
     $bot->get_messages_this_hour();
 
-replys with number of messages sent so far this hour.
+Returns the number of messages sent so far this hour.
 
 =cut
 
@@ -1097,7 +1097,7 @@ sub ChangeStatus {
     $bot->GetRoster();
 
 Returns a list of the people logged into the server.
-I suspect we really want to know who is in a paticular forum right?
+I suspect we really want to know who is in a particular forum right?
 In which case we need another sub for this.
 =cut
 
@@ -1172,15 +1172,12 @@ sub RmUser {
 
 =head1 AUTHOR
 
-Todd Rinaldo C<< <perl-net-jabber-bot@googlegroups.com) > >>
+Todd Rinaldo C<< <toddr@cpan.org> >>
 
 =head1 BUGS
 
-Please report any bugs or feature requests to
-C<perl-net-jabber-bot@googlegroups.com>, or through the web interface at
-L<http://code.google.com/p/perl-net-jabber-bot/issues/entry>.
-I will be notified, and then you'll automatically be notified of progress on
-your bug as I make changes.
+Please report any bugs or feature requests through the GitHub issue tracker at
+L<https://github.com/cpan-authors/perl-net-jabber-bot/issues>.
 
 =head1 SUPPORT
 
@@ -1192,21 +1189,13 @@ You can also look for information at:
 
 =over 4
 
-=item * AnnoCPAN: Annotated CPAN documentation
-
-L<http://annocpan.org/dist/Net-Jabber-Bot>
-
-=item * CPAN Ratings
-
-L<http://cpanratings.perl.org/d/Net-Jabber-Bot>
-
 =item * Metacpan
 
 L<https://metacpan.org/pod/Net::Jabber::Bot>
 
-=item * Github
+=item * GitHub
 
-L<https://github.com/toddr/perl-net-jabber-bot>
+L<https://github.com/cpan-authors/perl-net-jabber-bot>
 
 =back
 
