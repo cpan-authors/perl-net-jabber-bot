@@ -65,6 +65,7 @@ has 'from_full'           => (
 has 'safety_mode'             => ( isa => Bool, is => 'rw', default => 1, coerce => 1 );
 has 'ignore_server_messages'  => ( isa => Bool, is => 'rw', default => 1, coerce => 1 );
 has 'ignore_self_messages'    => ( isa => Bool, is => 'rw', default => 1, coerce => 1 );
+has 'auto_subscribe'          => ( isa => Bool, is => 'rw', default => 1, coerce => 1 );
 has 'forums_and_responses'    => ( isa => HashRef [ ArrayRef [Str] ], is => 'rw' );              # List of forums we're in and the strings we monitor for.
 has 'forum_join_time'         => ( isa => HashRef [Int], is => 'rw', default => sub { {} } );    # List of when we joined each forum
 has 'out_messages_per_second' => ( isa => PosNum, is => 'rw', default => sub { 5 } );
@@ -296,6 +297,10 @@ Boolean value as to whether we should ignore messages sent to us from the jabber
 Boolean value as to whether we should ignore messages sent by us.
 
 BE CAREFUL if you turn this on!!! Turning this on risks potentially endless loops. If you're going to do this, please be sure safety is turned on at least initially.
+
+=item B<auto_subscribe>
+
+Boolean value controlling whether the bot automatically accepts presence subscription requests from any JID. Defaults to 1 (enabled) for backward compatibility. Set to 0 to ignore subscription requests, which prevents unknown users from tracking the bot's online status.
 
 =item B<out_messages_per_second>
 
@@ -816,17 +821,22 @@ sub _jabber_presence_message {
     my $presence   = shift;
 
     my $type = $presence->GetType();
-    if ( $type eq 'subscribe' ) {    # Always allow people to subscribe to us. Why wouldn't we?
+    if ( $type eq 'subscribe' ) {
         my $from = $presence->GetFrom();
-        $self->jabber_client->Subscription(
-            type => "subscribe",
-            to   => $from
-        );
-        $self->jabber_client->Subscription( type => "subscribed", to => $from );
-        INFO("Processed subscription request from $from");
+        if ( $self->auto_subscribe ) {
+            $self->jabber_client->Subscription(
+                type => "subscribe",
+                to   => $from
+            );
+            $self->jabber_client->Subscription( type => "subscribed", to => $from );
+            INFO("Processed subscription request from $from");
+        }
+        else {
+            INFO("Ignored subscription request from $from (auto_subscribe disabled)");
+        }
         return;
     }
-    elsif ( $type eq 'unsubscribe' ) {    # Always allow people to subscribe to us. Why wouldn't we?
+    elsif ( $type eq 'unsubscribe' ) {
         my $from = $presence->GetFrom();
         $self->jabber_client->Subscription(
             type => "unsubscribed",
