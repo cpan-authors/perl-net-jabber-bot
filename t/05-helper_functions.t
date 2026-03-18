@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 127;
+use Test::More tests => 125;
 use Net::Jabber::Bot;
 
 #InitLog4Perl();
@@ -63,14 +63,13 @@ my $bot = Net::Jabber::Bot->new(
 				 , out_messages_per_second => $out_messages_per_second
 				 , max_message_size => $max_message_size
 				 , max_messages_per_hour => $max_messages_per_hour
+				 , forum_join_grace => 0
 				);
 
 is($bot->message_delay, 0.2, "Message delay is set right to .20 seconds");
 is($bot->max_messages_per_hour, $max_messages_per_hour, "Max messages per hour ($max_messages_per_hour) didn't get messed with by safeties");
 
 isa_ok($bot, "Net::Jabber::Bot");
-ok(1, "Sleeping 12 seconds to make sure we get past initializtion");
-ok((sleep 12) > 10, "Making sure the bot get's past login initialization (sleep 12)");
 process_bot_messages(); # Clean off the queue before we start?
 
 # continue editing here. Need to next enhance mock object to know jabber bot callbacks.

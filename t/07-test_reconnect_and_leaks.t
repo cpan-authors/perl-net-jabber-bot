@@ -31,6 +31,7 @@ my $bot = Net::Jabber::Bot->new(
     out_messages_per_second => 5,
     max_message_size       => 800,
     max_messages_per_hour  => 100,
+    forum_join_grace       => 0,
 );
 
 isa_ok( $bot, "Net::Jabber::Bot" );
@@ -56,9 +57,6 @@ ok( defined $process_result, "Process works after reconnect" );
 # Test 5: messages_sent_today does not leak old day entries
 {
     my $personal_address = "test_user\@$server/$bot_alias";
-
-    # Wait for grace period
-    sleep 12;
 
     # Simulate sending messages "yesterday" by injecting an old day entry
     my $today_yday     = ( localtime() )[7];

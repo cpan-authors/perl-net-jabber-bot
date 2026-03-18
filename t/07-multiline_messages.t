@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 9;
+use Test::More tests => 8;
 use Net::Jabber::Bot;
 
 use FindBin;
@@ -34,12 +34,10 @@ my $bot = Net::Jabber::Bot->new({
     out_messages_per_second => 5,
     max_message_size        => 800,
     max_messages_per_hour   => 100,
+    forum_join_grace        => 0,
 });
 
 isa_ok($bot, "Net::Jabber::Bot");
-
-# Wait past the forum join grace period
-ok((sleep 12) > 10, "Waited past forum join grace period");
 
 # Test 1: Newlines are preserved in sent messages
 {
