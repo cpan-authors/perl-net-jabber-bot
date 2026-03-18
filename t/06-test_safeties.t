@@ -217,7 +217,7 @@ sub process_bot_messages {
 
 sub InitLog4Perl {
 	use Log::Log4perl qw(:easy);
-    my $config_file .= <<'CONFIG_DATA';
+    my $config_file = <<'CONFIG_DATA';
 # Regular Screen Appender
 log4perl.appender.Screen           = Log::Log4perl::Appender::Screen
 log4perl.appender.Screen.stderr    = 0
