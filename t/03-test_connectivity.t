@@ -4,6 +4,7 @@ BEGIN {
     use Test::More;
 
     plan skip_all => "\$ENV{AUTHOR_TESTING} required for these tests" if(!$ENV{AUTHOR_TESTING});
+    plan skip_all => "t/test_config.cfg required for connectivity tests" if(! -f 't/test_config.cfg');
 }
 
 use Net::Jabber::Bot;
@@ -15,8 +16,7 @@ plan tests => 7;
 # Load config file (simple INI parser, replaces Config::Std).
 my $config_file = 't/test_config.cfg';
 my %config_file_hash;
-{
-    open my $fh, '<', $config_file or die "Can't open $config_file: $!";
+if (open my $fh, '<', $config_file) {
     my $section = '';
     while (my $line = <$fh>) {
         chomp $line;
