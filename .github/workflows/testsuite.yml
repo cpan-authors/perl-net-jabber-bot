@@ -1,0 +1,163 @@
+name: testsuite
+
+on:
+  push:
+    branches:
+      - "*"
+    tags-ignore:
+      - "*"
+  pull_request:
+
+jobs:
+  ubuntu:
+    env:
+      PERL_USE_UNSAFE_INC: 0
+      AUTHOR_TESTING: 1
+      AUTOMATED_TESTING: 1
+      RELEASE_TESTING: 1
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: perl -V
+        run: perl -V
+      - name: Install Dependencies
+        uses: perl-actions/install-with-cpm@v1
+        with:
+          cpanfile: "cpanfile"
+      - name: Makefile.PL
+        run: perl Makefile.PL
+      - name: make test
+        run: make test
+
+  disttest:
+    env:
+      PERL_USE_UNSAFE_INC: 0
+      AUTHOR_TESTING: 1
+      AUTOMATED_TESTING: 1
+      RELEASE_TESTING: 1
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: perl -V
+        run: perl -V
+      - name: Install Dependencies
+        uses: perl-actions/install-with-cpm@v1
+        with:
+          cpanfile: "cpanfile"
+      - name: Makefile.PL
+        run: perl Makefile.PL
+      - name: make disttest
+        run: make disttest
+
+  perl-versions:
+    runs-on: ubuntu-latest
+    needs: [ubuntu, disttest]
+    name: List Perl versions
+    outputs:
+      perl-versions: ${{ steps.action.outputs.perl-versions }}
+    steps:
+      - id: action
+        uses: perl-actions/perl-versions@v1
+        with:
+          since-perl: 5.22
+          with-devel: true
+
+  linux:
+    name: "Perl ${{ matrix.perl-version }}"
+    needs: [perl-versions]
+    runs-on: ubuntu-latest
+
+    env:
+      PERL_USE_UNSAFE_INC: 0
+      AUTHOR_TESTING: 1
+      AUTOMATED_TESTING: 1
+      RELEASE_TESTING: 1
+
+    strategy:
+      fail-fast: false
+      matrix:
+        perl-version: ${{ fromJson (needs.perl-versions.outputs.perl-versions) }}
+
+    container:
+      image: perldocker/perl-tester:${{ matrix.perl-version }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: perl -V
+        run: perl -V
+      - name: Install Net::XMPP (patch out broken LWP::Online dep)
+        run: |
+          cpanm --notest Authen::SASL XML::Stream Module::Build
+          curl -sL https://cpan.metacpan.org/authors/id/D/DA/DAPATRICK/Net-XMPP-1.05.tar.gz | tar xz
+          cd Net-XMPP-1.05
+          perl -ni -e "print unless /LWP::Online/" Build.PL
+          perl Build.PL && ./Build && ./Build install
+          cd .. && rm -rf Net-XMPP-1.05
+      - name: Install Dependencies
+        run: cpanm --notest Net::Jabber Log::Log4perl Moose MooseX::Types Mozilla::CA Sys::Hostname Time::HiRes version Test::More Test::NoWarnings Test::Pod Test::Pod::Coverage
+      - run: perl Makefile.PL
+      - run: make
+      - run: make test
+
+  macOS:
+    needs: [ubuntu, linux, windows]
+    runs-on: macos-latest
+
+    env:
+      PERL_USE_UNSAFE_INC: 0
+      AUTHOR_TESTING: 1
+      AUTOMATED_TESTING: 1
+      RELEASE_TESTING: 1
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Perl
+        run: brew install perl cpanminus
+      - name: perl -V
+        run: perl -V
+      - name: Install Net::XMPP (patch out broken LWP::Online dep)
+        run: |
+          cpanm --notest Authen::SASL XML::Stream Module::Build
+          curl -sL https://cpan.metacpan.org/authors/id/D/DA/DAPATRICK/Net-XMPP-1.05.tar.gz | tar xz
+          cd Net-XMPP-1.05
+          perl -ni -e "print unless /LWP::Online/" Build.PL
+          perl Build.PL && ./Build && ./Build install
+          cd .. && rm -rf Net-XMPP-1.05
+      - name: Install Dependencies
+        run: cpanm --notest Net::Jabber Log::Log4perl Moose MooseX::Types Mozilla::CA Sys::Hostname Time::HiRes version Test::More Test::NoWarnings Test::Pod Test::Pod::Coverage
+      - run: perl Makefile.PL
+      - run: make
+      - run: make test
+
+  windows:
+    needs: [ubuntu, linux]
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Perl
+        run: |
+          choco install strawberryperl
+          echo @"
+          C:\strawberry\c\bin
+          C:\strawberry\perl\site\bin
+          C:\strawberry\perl\bin
+          "@ |
+            Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: perl -V
+        run: perl -V
+      - name: Install Dependencies
+        uses: perl-actions/install-with-cpm@v1
+        with:
+          sudo: false
+          cpanfile: "cpanfile"
+      - name: perl Makefile.PL
+        run: perl Makefile.PL
+      - name: make
+        run: make
+      - name: Run Tests
+        run: make test
