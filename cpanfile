@@ -1,6 +1,7 @@
 requires 'Log::Log4perl';
-requires 'Moose', '0.82';
-requires 'MooseX::Types', '0.12';
+requires 'Moo', '2';
+requires 'Type::Tiny', '1';
+requires 'Types::Standard';
 requires 'Mozilla::CA';
 requires 'Net::Jabber', '2.0';
 requires 'Sys::Hostname';

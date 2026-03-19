@@ -11,7 +11,7 @@ Version 2.1.7
 # SYNOPSIS
 
 Program design:
-This is a Moose based Class.
+This is a Moo based Class.
 
 The idea behind the module is that someone creating a bot should not really have to know a whole lot about how the Jabber protocol works in order to use it. It also allows us to abstract away all the things that can get a bot maker into trouble. Essentially the object helps protect the coders from their own mistakes.
 

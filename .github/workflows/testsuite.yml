@@ -98,7 +98,7 @@ jobs:
           perl Build.PL && ./Build && ./Build install
           cd .. && rm -rf Net-XMPP-1.05
       - name: Install Dependencies
-        run: cpanm --notest Net::Jabber Log::Log4perl Moose MooseX::Types Mozilla::CA Sys::Hostname Time::HiRes version Test::More Test::NoWarnings Test::Pod Test::Pod::Coverage
+        run: cpanm --notest Net::Jabber Log::Log4perl Moo Type::Tiny Types::Standard Mozilla::CA Sys::Hostname Time::HiRes version Test::More Test::NoWarnings Test::Pod Test::Pod::Coverage
       - run: perl Makefile.PL
       - run: make
       - run: make test
@@ -128,7 +128,7 @@ jobs:
           perl Build.PL && ./Build && ./Build install
           cd .. && rm -rf Net-XMPP-1.05
       - name: Install Dependencies
-        run: cpanm --notest Net::Jabber Log::Log4perl Moose MooseX::Types Mozilla::CA Sys::Hostname Time::HiRes version Test::More Test::NoWarnings Test::Pod Test::Pod::Coverage
+        run: cpanm --notest Net::Jabber Log::Log4perl Moo Type::Tiny Types::Standard Mozilla::CA Sys::Hostname Time::HiRes version Test::More Test::NoWarnings Test::Pod Test::Pod::Coverage
       - run: perl Makefile.PL
       - run: make
       - run: make test

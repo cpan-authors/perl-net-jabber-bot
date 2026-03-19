@@ -117,7 +117,7 @@ TODO: { # Need a way to test for historical - up top or in diff code?
 cmp_ok($bot->respond_to_self_messages( ), '==', 1, "no pass to respond_to_self_messages is 1");
 cmp_ok($bot->respond_to_self_messages(0), '==', 0, "Ignore Self Messages");
 cmp_ok($bot->respond_to_self_messages(2), '==', 1, "Respond to Self Messages");
-cmp_ok($bot->ignore_self_messages, '==', 0, "Moose variable is set right for ignore_self_messages");
+cmp_ok($bot->ignore_self_messages, '==', 0, "Moo variable is set right for ignore_self_messages");
 
 
 start_new_test("Test a successful message");
