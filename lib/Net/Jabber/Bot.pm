@@ -13,6 +13,7 @@ use Mozilla::CA;
 
 my $PosInt     = Type::Tiny->new( name => 'PosInt',     parent => Int, constraint => sub { $_ > 0 } );
 my $PosNum     = Type::Tiny->new( name => 'PosNum',     parent => Num, constraint => sub { $_ > 0 } );
+my $NonNegNum  = Type::Tiny->new( name => 'NonNegNum',  parent => Num, constraint => sub { $_ >= 0 } );
 my $HundredInt = Type::Tiny->new( name => 'HundredInt', parent => Num, constraint => sub { $_ > 100 } );
 
 my $CoercedBool = Bool->plus_coercions( Str, sub { ( $_ =~ m/(^on$)|(^true$)/i ) + 0 } );
@@ -25,21 +26,21 @@ has jabber_client => (
 
 #my %connection_hash : ATTR; # Keep track of connection options fed to client.
 
-has 'client_session_id' => ( isa => Str,      is   => 'rw' );
-has 'connect_time'      => ( isa => $PosInt,  is   => 'rw', default => 9_999_999_999 );
-has 'forum_join_grace'  => ( isa => $PosNum,  is   => 'rw', default => 10 );
-has 'server_host'       => ( isa => Str,      is   => 'rw', lazy    => 1, default => sub { shift->server } );
-has 'server'            => ( isa => Str,      is   => 'rw' );
-has 'port'              => ( isa => $PosInt,  is   => 'rw', default => 5222 );
-has 'gtalk'             => ( isa => Bool,     is   => 'rw', default => '0' );
-has 'tls'               => ( isa => Bool,     is   => 'rw', default => '0' );
-has 'ssl_ca_path'       => ( isa => Str,      is   => 'rw', default => Mozilla::CA::SSL_ca_file() );
-has 'ssl_verify'        => ( isa => Bool,     is   => 'rw', default => '1' );
-has 'connection_type'   => ( isa => Str,      is   => 'rw', default => 'tcpip' );
-has 'conference_server' => ( isa => Str,      is   => 'rw' );
-has 'username'          => ( isa => Str,      is   => 'rw' );
-has 'password'          => ( isa => Str,      is   => 'rw' );
-has 'alias'             => ( isa => Str,      lazy => 1, is => 'rw', default => 'net_jabber_bot' );
+has 'client_session_id' => ( isa => Str,         is   => 'rw' );
+has 'connect_time'      => ( isa => $PosInt,     is   => 'rw', default => 9_999_999_999 );
+has 'forum_join_grace'  => ( isa => $NonNegNum,  is   => 'rw', default => 10 );
+has 'server_host'       => ( isa => Str,         is   => 'rw', lazy    => 1, default => sub { shift->server } );
+has 'server'            => ( isa => Str,         is   => 'rw' );
+has 'port'              => ( isa => $PosInt,     is   => 'rw', default => 5222 );
+has 'gtalk'             => ( isa => Bool,        is   => 'rw', default => '0' );
+has 'tls'               => ( isa => Bool,        is   => 'rw', default => '0' );
+has 'ssl_ca_path'       => ( isa => Str,         is   => 'rw', default => Mozilla::CA::SSL_ca_file() );
+has 'ssl_verify'        => ( isa => Bool,        is   => 'rw', default => '1' );
+has 'connection_type'   => ( isa => Str,         is   => 'rw', default => 'tcpip' );
+has 'conference_server' => ( isa => Str,         is   => 'rw' );
+has 'username'          => ( isa => Str,         is   => 'rw' );
+has 'password'          => ( isa => Str,         is   => 'rw' );
+has 'alias'             => ( isa => Str,         lazy => 1, is => 'rw', default => 'net_jabber_bot' );
 
 # Resource defaults to alias_hostname_pid
 has 'resource'            => ( isa => Str, lazy => 1, is => 'rw', default => sub { shift->alias . "_" . hostname . "_" . $$ } );

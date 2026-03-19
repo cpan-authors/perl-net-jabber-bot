@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 10;
+use Test::More tests => 9;
 use Net::Jabber::Bot;
 
 # stuff for mock client object
@@ -38,10 +38,10 @@ my $bot = Net::Jabber::Bot->new(
     out_messages_per_second => 5,
     max_message_size       => 1000,
     max_messages_per_hour  => 100,
+    forum_join_grace       => 0,
 );
 
 isa_ok( $bot, "Net::Jabber::Bot" );
-ok( ( sleep 12 ) > 10, "Wait past initialization grace period" );
 
 # Track the last MessageSend args for verification
 my @last_message_send_args;

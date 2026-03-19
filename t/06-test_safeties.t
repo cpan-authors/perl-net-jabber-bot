@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 129;
+use Test::More tests => 127;
 use Net::Jabber::Bot;
 
 # stuff for mock client object
@@ -62,6 +62,7 @@ my $bot = Net::Jabber::Bot->new({
 				 , out_messages_per_second => $out_messages_per_second
 				 , max_message_size => $max_message_size
 				 , max_messages_per_hour => $max_messages_per_hour
+				 , forum_join_grace => 0
 				});
 
 isa_ok($bot, "Net::Jabber::Bot");
@@ -70,9 +71,7 @@ is($bot->max_messages_per_hour, $max_messages_per_hour, "Max messages per hour (
 is($bot->get_safety_mode, 1, "Validate safety mode is on")
     or die("Safety mode is not turning on. Tests will not be valid");
 
-is($bot->forum_join_grace, 10, "Forum Grace is 10 seconds as expected");
-ok(1, "Sleeping 12 seconds to make sure we get past initializtion");
-ok((sleep 12) > 10, "Making sure the bot get's past initialization (sleep 12)");
+is($bot->forum_join_grace, 0, "Forum Grace is 0 seconds as configured");
 process_bot_messages();
 
 start_new_test("Testing Group Message bursting is not possible");
@@ -211,7 +210,6 @@ sub start_new_test {
 
 
 sub process_bot_messages {
-    sleep 2; # Pause a little to make sure message make it to the server and back.
     ok(defined $bot->Process(5), "Processed new messages and didn't lose connection.");
 }
 

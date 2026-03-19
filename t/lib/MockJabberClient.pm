@@ -39,15 +39,12 @@ sub Process {
     return if(!$self->{is_connected}); # Return undef if we're not connected.
 
     foreach my $message (@{$self->{message_queue}}) {
-        $timeout = 0; # zero out sleep timer;
         next if(!defined $self->{message_callback});
         $self->{message_callback}->($self->{SESSION}->{id}, $message);
     }
-    
-    
+
     @{$self->{message_queue}} = ();
 
-    sleep $timeout;
     return 1; # undef means we lost connection.
 }
 
