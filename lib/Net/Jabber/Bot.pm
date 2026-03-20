@@ -580,7 +580,14 @@ sub ReconnectToServer {
         INFO("Sleeping $sleep_time before attempting re-connect");
         sleep $sleep_time;
         $sleep_time *= 2 if ( $sleep_time < 300 );
-        $self->_init_jabber();
+        eval { $self->_init_jabber() };
+        if ($@) {
+            WARN("Reconnection attempt failed: $@");
+            # Clean up partial client state so IsConnected() stays false
+            # and next _init_jabber() creates a fresh client
+            $self->jabber_client(undef);
+            next;
+        }
         if ( defined $background_subroutine ) {
             INFO("Running background routine.");
             &$background_subroutine( $self, 0 );    # call background proc so we can check for errors while down.
@@ -782,7 +789,7 @@ sub _jabber_in_iq_message {
         # convert 5.010000 to 5.10.0
         my $perl_version = $];
         $perl_version =~ s/(\d{3})(?=\d)/$1./g;
-        $perl_version =~ s/\.0+(\d)/.$1/;
+        $perl_version =~ s/\.0+(\d)/.$1/g;
 
         $self->jabber_client->VersionSend(
             to   => $from,
