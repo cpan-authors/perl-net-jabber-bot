@@ -100,11 +100,11 @@ Net::Jabber::Bot - Automated Bot creation with safeties
 
 =head1 VERSION
 
-Version 2.1.7
+Version 2.1.8
 
 =cut
 
-our $VERSION = '2.1.7';
+our $VERSION = '2.1.8';
 
 =head1 SYNOPSIS
 
