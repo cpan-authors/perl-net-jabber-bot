@@ -1029,6 +1029,18 @@ sub _send_individual_message {
         return "No recipient!\n";
     }
 
+    # Check connection first — don't count messages that can't actually be sent.
+    # Otherwise, messages attempted during disconnection inflate the hourly
+    # counter and can exhaust the limit before real messages are sent.
+    if ( !$self->IsConnected ) {
+        $subject       = "" if ( !defined $subject );          # Keep warning messages quiet.
+        $message_chunk = "" if ( !defined $message_chunk );    # Keep warning messages quiet.
+
+        ERROR( "Can't send: Jabber server is down. Tried to send: \n" . "To: $recipient\n" . "Subject: $subject\n" . "Type: $message_type\n" . "Message sent:\n" . "$message_chunk" );
+
+        return "Server is down.\n";
+    }
+
     my $yday = (localtime)[7];
     my $hour = (localtime)[2];
 
@@ -1048,16 +1060,6 @@ sub _send_individual_message {
 
         # Send 1 panic message out to jabber if this is our last message before quieting down.
         return "Too many messages ($messages_this_hour)\n";
-    }
-
-    if ( !$self->IsConnected ) {
-        $subject       = "" if ( !defined $subject );          # Keep warning messages quiet.
-        $message_chunk = "" if ( !defined $message_chunk );    # Keep warning messages quiet.
-
-        ERROR( "Can't send: Jabber server is down. Tried to send: \n" . "To: $recipient\n" . "Subject: $subject\n" . "Type: $message_type\n" . "Message sent:\n" . "$message_chunk" );
-
-        # Send 1 panic message out to jabber if this is our last message before quieting down.
-        return "Server is down.\n";
     }
 
     # Strip out anything that's not a printable character except new line, we want to be able to send multiline message, aren't we?
