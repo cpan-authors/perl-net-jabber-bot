@@ -472,6 +472,11 @@ sub JoinForum {
     my $self       = shift;
     my $forum_name = shift;
 
+    if ( !$self->IsConnected ) {
+        WARN("Cannot join forum '$forum_name': not connected");
+        return;
+    }
+
     DEBUG( "Joining $forum_name on " . $self->conference_server . " as " . $self->alias );
 
     $self->jabber_client->MUCJoin(
@@ -497,6 +502,8 @@ You should mostly be calling Start() and just let the Bot kernel handle all this
 sub Process {    # Call connection process.
     my $self            = shift;
     my $timeout_seconds = shift;
+
+    return if !$self->IsConnected;
 
     #If not passed explicitly
     $timeout_seconds = $self->process_timeout if ( !defined $timeout_seconds );
@@ -1140,6 +1147,11 @@ sub ChangeStatus {
     my $presence_mode = shift;
     my $status_string = shift;    # (optional)
 
+    if ( !$self->IsConnected ) {
+        WARN("Cannot change status: not connected");
+        return 0;
+    }
+
     $self->jabber_client->PresenceSend( show => $presence_mode, status => $status_string );
 
     return 1;
@@ -1156,6 +1168,11 @@ In which case we need another sub for this.
 
 sub GetRoster {
     my $self = shift;
+
+    if ( !$self->IsConnected ) {
+        WARN("Cannot get roster: not connected");
+        return ();
+    }
 
     my @rosterlist;
     foreach my $jid ( $self->jabber_client->RosterDBJIDs() ) {
@@ -1175,6 +1192,8 @@ sub GetStatus {
 
     my $self = shift;
     my ($jid) = shift;
+
+    return "unavailable" if !$self->IsConnected;
 
     my $Pres = $self->jabber_client->PresenceDBQuery($jid);
 
@@ -1203,6 +1222,11 @@ sub AddUser {
     my $self = shift;
     my $user = shift;
 
+    if ( !$self->IsConnected ) {
+        WARN("Cannot add user '$user': not connected");
+        return;
+    }
+
     $self->jabber_client->Subscription( type => "subscribe",  to => $user );
     $self->jabber_client->Subscription( type => "subscribed", to => $user );
 }
@@ -1216,6 +1240,11 @@ Need documentation from Yago on this sub.
 sub RmUser {
     my $self = shift;
     my $user = shift;
+
+    if ( !$self->IsConnected ) {
+        WARN("Cannot remove user '$user': not connected");
+        return;
+    }
 
     $self->jabber_client->Subscription( type => "unsubscribe",  to => $user );
     $self->jabber_client->Subscription( type => "unsubscribed", to => $user );
