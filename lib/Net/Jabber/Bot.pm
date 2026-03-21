@@ -543,7 +543,6 @@ sub Start {
 
     while (1) {                                                            # Loop for ever!
                                                                            # Process and re-connect if you have to.
-        my $reconnect_timeout = 1;
         eval { $self->Process($process_timeout) };
 
         if ($@) {                                                          #Assume the connection is down...
@@ -713,8 +712,10 @@ sub _process_jabber_message {
             $bot_address_from = $address_type;
             last;    # do not need to loop any more.
         }
-        DEBUG("Message not relevant to bot");
-        return if ( !defined $request );
+        if ( !defined $request ) {
+            DEBUG("Message not relevant to bot");
+            return;
+        }
         $body = $request;
     }
 
@@ -788,7 +789,6 @@ sub _jabber_in_iq_message {
 
     my $xmlns = $query->GetXMLNS();
     DEBUG("xmlns=$xmlns");
-    my $iqReply;
 
     # Respond to version requests with information about myself.
     if ( $xmlns eq "jabber:iq:version" ) {
@@ -805,16 +805,6 @@ sub _jabber_in_iq_message {
             os   => "Perl v$perl_version"
         );
     }
-    else {    # Unknown request. Just ignore it.
-        return;
-    }
-
-    if ($iqReply) {
-        DEBUG( "Reply: ", $iqReply->GetXML() );
-        $self->jabber_client->Send($iqReply);
-    }
-
-    #    INFO("IQ from $from ($type). XMLNS: $xmlns");
 }
 
 =item B<_jabber_presence_message> - DO NOT CALL
