@@ -1,5 +1,34 @@
 Revision history for Net-Jabber-Bot
 
+2.1.9 2026-03-22 Todd Rinaldo
+
+  [Fixes]
+  - Fix uninitialized value warning in SendJabberMessage when concatenating
+    error strings from chunked messages via .= on undef variable; also fix
+    POD method name typo (get_ident -> get_responses) and broken E<gt>
+    escape sequence (PR #58)
+  - Guard all public API methods (ChangeStatus, GetRoster, GetStatus,
+    Process, JoinForum, AddUser, RmUser) against crashes when called while
+    disconnected — previously crashed with "Can't call method on an
+    undefined value" (PR #55)
+  - Fix misleading "Message not relevant to bot" debug log that fired for
+    all messages instead of only genuinely irrelevant ones (PR #57)
+
+  [Improvements]
+  - Add Stop() method for graceful shutdown of Start() event loop; Start()
+    now returns the loop iteration count and can be re-called after Stop()
+    (PR #56)
+
+  [Maintenance]
+  - Remove dead code: unused $iqReply and unreachable block in
+    _jabber_in_iq_message, unused $reconnect_timeout in Start() (PR #57)
+  - Remove legacy Class::Std commented-out attribute declarations, write
+    real documentation for GetStatus, AddUser, and RmUser methods (PR #58)
+  - New test: t/07-test_disconnect_public_api.t for public API calls while
+    disconnected (PR #55)
+  - New test: t/08-test_start_stop.t for Stop() and Start() lifecycle
+    (PR #56)
+
 2.1.8 2026-03-20 Todd Rinaldo
 
   [Fixes]

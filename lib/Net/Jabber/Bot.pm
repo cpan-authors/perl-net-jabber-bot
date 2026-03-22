@@ -90,7 +90,7 @@ Version 2.1.8
 
 =cut
 
-our $VERSION = '2.1.8';
+our $VERSION = '2.1.9';
 
 =head1 SYNOPSIS
 
