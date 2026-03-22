@@ -79,6 +79,8 @@ has 'messages_sent_today' => (
     }
 );
 
+has '_running' => ( isa => Bool, is => 'rw', default => 0 );
+
 #my %message_function : ATTR; # What is called if we are fed a new message once we are logged in.
 #my %bot_background_function : ATTR; # What is called if we are fed a new message once we are logged in.
 #my %forum_join_time : ATTR;  # Tells us if we've parsed historical messages yet.
@@ -514,7 +516,7 @@ sub Process {    # Call connection process.
 
 =item B<Start>
 
-Primary subroutine save new called by the program. Does an endless loop of:
+Primary subroutine save new called by the program. Runs a loop of:
 
 =over
 
@@ -528,6 +530,8 @@ Primary subroutine save new called by the program. Does an endless loop of:
 
 =back
 
+The loop runs until Stop() is called. Returns the loop iteration count.
+
 =cut
 
 sub Start {
@@ -539,9 +543,11 @@ sub Start {
     my $message_delay                    = $self->message_delay;
 
     my $last_background = time - $time_between_background_routines - 1;    # Call background process every so often...
-    my $counter         = 0;                                               # Keep track of how many times we've looped. Not sure if we'll use this long term.
+    my $counter         = 0;                                               # Keep track of how many times we've looped.
 
-    while (1) {                                                            # Loop for ever!
+    $self->_running(1);
+
+    while ( $self->_running ) {
                                                                            # Process and re-connect if you have to.
         eval { $self->Process($process_timeout) };
 
@@ -561,6 +567,25 @@ sub Start {
         }
         Time::HiRes::sleep $message_delay;
     }
+
+    return $counter;
+}
+
+=item B<Stop>
+
+    $bot->Stop();
+
+Signals the Start() loop to exit after the current iteration completes.
+Typically called from within the background_function or message_function callback.
+
+=cut
+
+sub Stop {
+    my $self = shift;
+
+    INFO("Stop requested, will exit Start() loop after current iteration");
+    $self->_running(0);
+    return 1;
 }
 
 =item B<ReconnectToServer>
