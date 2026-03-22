@@ -24,8 +24,6 @@ has jabber_client => (
     default => sub { Net::Jabber::Client->new }
 );
 
-#my %connection_hash : ATTR; # Keep track of connection options fed to client.
-
 has 'client_session_id' => ( isa => Str,         is   => 'rw' );
 has 'connect_time'      => ( isa => $PosInt,     is   => 'rw', default => 9_999_999_999 );
 has 'forum_join_grace'  => ( isa => $NonNegNum,  is   => 'rw', default => 10 );
@@ -81,20 +79,6 @@ has 'messages_sent_today' => (
 
 has '_running' => ( isa => Bool, is => 'rw', default => 0 );
 
-#my %message_function : ATTR; # What is called if we are fed a new message once we are logged in.
-#my %bot_background_function : ATTR; # What is called if we are fed a new message once we are logged in.
-#my %forum_join_time : ATTR;  # Tells us if we've parsed historical messages yet.
-#my %client_start_time :ATTR; # Track when we came online. Also used to determine if we're online.
-#my %process_timeout : ATTR;  # Time to take in process loop if no messages found
-#my %loop_sleep_time : ATTR;  # Time to sleep each time we go through a Start() loop.
-#my %ignore_messages : ATTR;  # Messages to ignore if we recieve them.
-#my %forums_and_responses: ATTR; # List of forums we have joined and who we respond to in each forum
-#my %message_delay: ATTR;    # Allows us to limit Messages per second
-#my %max_message_size: ATTR; # Maximum allowed message size before we chunk them.
-#my %forum_join_grace: ATTR; # Time before we start responding to forum messages.
-#my %messages_sent_today: ATTR;   # Tracks messages sent in 2 dimentional hash by day/hour
-#my %max_messages_per_hour: ATTR; # Limits the number of messages per hour.
-#my %safety_mode: ATTR; # Tracks if we are in safety mode.
 
 =head1 NAME
 
@@ -302,7 +286,7 @@ Boolean value controlling whether the bot automatically accepts presence subscri
 
 =item B<out_messages_per_second>
 
-Limits the number of messages per second. Number must be <gt> 0
+Limits the number of messages per second. Number must be E<gt> 0
 
 default: 5
 
@@ -765,7 +749,7 @@ sub _process_jabber_message {
 
 =item B<get_responses>
 
-    $bot->get_ident($forum_name);
+    $bot->get_responses($forum_name);
 
 Returns the array of messages we are monitoring for in supplied forum or replies with undef.
 
@@ -1026,7 +1010,7 @@ sub SendJabberMessage {
     foreach my $message_chunk (@message_chunks) {
         my $msg_return = $self->_send_individual_message( $recipient, $message_chunk, $message_type, $subject, $from );
         if ( defined $msg_return ) {
-            $return_value .= $msg_return;
+            $return_value = ( $return_value // '' ) . $msg_return;
         }
     }
     return $return_value;
@@ -1199,7 +1183,12 @@ sub GetRoster {
 
 =item B<GetStatus>
 
-Need documentation from Yago on this sub.
+    my $status = $bot->GetStatus($jid);
+
+Returns the presence status of the given JID. Possible return values are
+"unavailable" (if not connected or JID not found in the presence database),
+"available" (if present with no specific show value), or the XMPP show value
+(e.g. "away", "xa", "dnd", "chat").
 
 =cut
 
@@ -1229,7 +1218,11 @@ sub GetStatus {
 
 =item B<AddUser>
 
-Need documentation from Yago on this sub.
+    $bot->AddUser($jid);
+
+Sends a subscription request to the given JID and auto-approves their
+reciprocal subscription. This adds the user to the bot's roster and allows
+mutual presence visibility.
 
 =cut
 
@@ -1248,7 +1241,10 @@ sub AddUser {
 
 =item B<RmUser>
 
-Need documentation from Yago on this sub.
+    $bot->RmUser($jid);
+
+Sends an unsubscribe request for the given JID and revokes their subscription
+to the bot's presence. This effectively removes the user from the bot's roster.
 
 =cut
 
