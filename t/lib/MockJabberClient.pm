@@ -28,6 +28,12 @@ sub new {
     $self->{password} = undef;
     $self->{resource} = undef;
 
+    $self->{subscription_log} = [];
+    $self->{muc_join_log} = [];
+    $self->{presence_send_log} = [];
+    $self->{roster_jids} = [];
+    $self->{presence_db} = {};
+
     return $self;
 }
 
@@ -48,7 +54,11 @@ sub Process {
     return 1; # undef means we lost connection.
 }
 
-sub PresenceSend {;}
+sub PresenceSend {
+    my $self = shift;
+    my %args = @_;
+    push @{$self->{presence_send_log}}, \%args;
+}
 
 
 sub SetCallBacks {
@@ -111,7 +121,11 @@ sub MessageSend { #Loop the messages into the in queue so we can see the server 
     push @{$self->{message_queue}}, $message;
 }
 
-sub MUCJoin {; }
+sub MUCJoin {
+    my $self = shift;
+    my %args = @_;
+    push @{$self->{muc_join_log}}, \%args;
+}
 
 sub Disconnect {
     my $self = shift;
@@ -120,16 +134,38 @@ sub Disconnect {
 
 sub Send {;} # Used for IQ. need to see if we need to put something here.
 
-sub Subscription {;} # Used to process JabberPresenceMessages we don't really use this data at the moment.
+sub Subscription {
+    my $self = shift;
+    my %args = @_;
+    push @{$self->{subscription_log}}, \%args;
+}
 sub RosterGet {;}
 sub RosterDB {;}
 sub RosterRequest {;}
-sub RosterDBJIDs { return (); }
+sub RosterDBJIDs {
+    my $self = shift;
+    return @{$self->{roster_jids}};
+}
 sub PresenceDB {;}
-sub PresenceDBParse{;}
 
-no warnings 'redefine';
-sub RosterDB {;}
-sub RosterRequest {;}
+sub PresenceDBParse {
+    my $self = shift;
+    my $presence = shift;
+    # Store presence by from JID for later query
+    my $from = $presence->GetFrom();
+    $self->{presence_db}{$from} = $presence if defined $from;
+}
+
+sub PresenceDBQuery {
+    my $self = shift;
+    my $jid = shift;
+    return $self->{presence_db}{$jid};
+}
+
+sub VersionSend {
+    my $self = shift;
+    my %args = @_;
+    $self->{last_version_send} = \%args;
+}
 
 1;
