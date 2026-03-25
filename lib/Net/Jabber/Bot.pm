@@ -86,7 +86,7 @@ Net::Jabber::Bot - Automated Bot creation with safeties
 
 =head1 VERSION
 
-Version 2.1.8
+Version 2.1.9
 
 =cut
 
