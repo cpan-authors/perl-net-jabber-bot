@@ -7,6 +7,11 @@ use Log::Log4perl qw(:easy);
 
 # NOTE: Need to inherit from Jabber bot object so we don't have to re-do message code, etc.
 
+# Package variables for simulating connection/process failures in tests
+our $connect_fail_remaining = 0;
+our $process_die_remaining = 0;
+our $process_return_undef_remaining = 0;
+
 sub new {
     my $proto = shift;
     my $self = { };
@@ -42,6 +47,18 @@ sub Process {
     my $self = shift;
     my $timeout = shift or 0;
 
+    # Simulate Process() dying (e.g., XML parse error, socket exception)
+    if ($process_die_remaining > 0) {
+        $process_die_remaining--;
+        die "Simulated connection error\n";
+    }
+
+    # Simulate Process() returning undef (silent connection loss)
+    if ($process_return_undef_remaining > 0) {
+        $process_return_undef_remaining--;
+        return undef;
+    }
+
     return if(!$self->{is_connected}); # Return undef if we're not connected.
 
     foreach my $message (@{$self->{message_queue}}) {
@@ -69,8 +86,6 @@ sub SetCallBacks {
     $self->{iq_callback}       = $callbacks{'iq'};
     $self->{message_callback}  = $callbacks{'message'};
 }
-
-our $connect_fail_remaining = 0;
 
 sub Connect {
     my $self = shift;
