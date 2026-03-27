@@ -31,6 +31,7 @@ sub new {
     $self->{subscription_log} = [];
     $self->{muc_join_log} = [];
     $self->{presence_send_log} = [];
+    $self->{sent_messages_log} = [];
     $self->{roster_jids} = [];
     $self->{presence_db} = {};
 
@@ -99,6 +100,9 @@ sub AuthSend {
 sub MessageSend { #Loop the messages into the in queue so we can see the server send em back. Needs peer review
     my $self = shift;
     my %arg_hash = @_;
+
+    # Log the raw send arguments for test inspection
+    push @{$self->{sent_messages_log}}, { %arg_hash };
     my $message = new Net::Jabber::Message();
     
     my $sent_to = $arg_hash{'to'};
