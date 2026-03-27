@@ -1010,7 +1010,7 @@ sub SendJabberMessage {
     foreach my $message_chunk (@message_chunks) {
         my $msg_return = $self->_send_individual_message( $recipient, $message_chunk, $message_type, $subject, $from );
         if ( defined $msg_return ) {
-            $return_value = ( $return_value // '' ) . $msg_return;
+            $return_value = ( defined $return_value ? $return_value : '' ) . $msg_return;
         }
     }
     return $return_value;
