@@ -323,4 +323,17 @@ subtest 'get_safety_mode reports correctly' => sub {
     ok( $bot->get_safety_mode(), "get_safety_mode returns true when safety is on" );
 };
 
+# ─── from_full attribute ──────────────────────────────────
+
+subtest 'from_full uses resource not alias' => sub {
+    # resource defaults to alias_hostname_pid, which differs from alias
+    my $from = $bot->from_full;
+    my $expected = $bot->username . '@' . $bot->server . '/' . $bot->resource;
+    is( $from, $expected, "from_full matches username\@server/resource" );
+
+    # Verify it uses resource (which includes hostname/pid) not bare alias
+    like( $from, qr/\Q$bot_alias\E_/, "from_full resource starts with alias but includes more" );
+    unlike( $from, qr/\/$bot_alias$/, "from_full does not end with bare alias" );
+};
+
 done_testing();
