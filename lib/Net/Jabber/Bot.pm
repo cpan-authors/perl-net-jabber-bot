@@ -1,5 +1,6 @@
 package Net::Jabber::Bot;
 
+use 5.010;
 use Moo;
 use Types::Standard qw(Int HashRef Str Maybe ArrayRef Bool CodeRef InstanceOf Num);
 use Type::Tiny;
