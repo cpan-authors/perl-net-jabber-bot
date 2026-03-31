@@ -1002,9 +1002,37 @@ sub SendJabberMessage {
 
     my $max_size = $self->max_message_size;
 
-    # Split the message into no more than max_message_size so that we do not piss off jabber.
-    # Split on new line. Space if you have to or just chop at max size.
-    my @message_chunks = ( $message =~ /.{1,$max_size}$|.{1,$max_size}\n|.{1,$max_size}\s|.{1,$max_size}/gs );
+    # Split the message into chunks of at most max_message_size characters.
+    # Prefer breaking at newlines, then spaces, then hard chop.
+    my @message_chunks;
+    my $remaining = $message;
+    while ( length $remaining ) {
+        if ( length $remaining <= $max_size ) {
+            push @message_chunks, $remaining;
+            last;
+        }
+        my $chunk = substr( $remaining, 0, $max_size );
+        my $break_pos;
+
+        # Prefer breaking at the last newline within the chunk
+        my $nl_pos = rindex( $chunk, "\n" );
+        if ( $nl_pos >= 0 ) {
+            $break_pos = $nl_pos + 1;    # include the newline
+        }
+        else {
+            # Fall back to the last space
+            my $sp_pos = rindex( $chunk, " " );
+            if ( $sp_pos >= 0 ) {
+                $break_pos = $sp_pos + 1;    # include the space
+            }
+            else {
+                $break_pos = $max_size;      # hard chop
+            }
+        }
+
+        push @message_chunks, substr( $remaining, 0, $break_pos );
+        $remaining = substr( $remaining, $break_pos );
+    }
 
     DEBUG("Max message = $max_size. Splitting...") if ( $#message_chunks > 0 );
     my $return_value;
