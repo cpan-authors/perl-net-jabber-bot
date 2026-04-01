@@ -15,6 +15,9 @@ t/07-multiline_messages.t
 t/07-test_disconnect_message_count.t
 t/07-test_disconnect_public_api.t
 t/07-test_from_parameter.t
+t/07-test_message_callback.t
+t/07-test_message_chunking.t
+t/07-test_public_api_connected.t
 t/07-test_reconnect_and_leaks.t
 t/07-test_reconnect_failure.t
 t/08-test_start_stop.t
