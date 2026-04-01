@@ -104,7 +104,7 @@ jobs:
       - run: make test
 
   macOS:
-    needs: [ubuntu, linux, windows]
+    needs: [ubuntu, disttest]
     runs-on: macos-latest
 
     env:
@@ -134,7 +134,7 @@ jobs:
       - run: make test
 
   windows:
-    needs: [ubuntu, linux]
+    needs: [ubuntu, disttest]
     runs-on: windows-latest
 
     steps:
