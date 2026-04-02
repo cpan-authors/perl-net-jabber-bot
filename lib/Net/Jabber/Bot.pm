@@ -1157,9 +1157,7 @@ sub SetForumSubject {
         DEBUG("Truncated subject: $subject");
         return "Subject is too long!";
     }
-    $self->_send_individual_message( $recipient, "Setting subject to $subject", 'groupchat', $subject );
-
-    return;
+    return $self->_send_individual_message( $recipient, "Setting subject to $subject", 'groupchat', $subject );
 }
 
 =item B<ChangeStatus>
