@@ -81,6 +81,8 @@ has 'messages_sent_today' => (
 has '_running' => ( isa => Bool, is => 'rw', default => 0 );
 
 
+=for markdown [![testsuite](https://github.com/cpan-authors/perl-net-jabber-bot/actions/workflows/testsuite.yml/badge.svg)](https://github.com/cpan-authors/perl-net-jabber-bot/actions/workflows/testsuite.yml)
+
 =head1 NAME
 
 Net::Jabber::Bot - Automated Bot creation with safeties
