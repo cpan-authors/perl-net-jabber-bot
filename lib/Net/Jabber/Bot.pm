@@ -534,10 +534,12 @@ sub Start {
 
     while ( $self->_running ) {
                                                                            # Process and re-connect if you have to.
-        eval { $self->Process($process_timeout) };
+        my $process_result;
+        eval { $process_result = $self->Process($process_timeout) };
 
-        if ($@) {                                                          #Assume the connection is down...
-            ERROR("Server error: $@");
+        if ($@ || !defined $process_result) {                              #Assume the connection is down...
+            my $error = $@ || "Process returned undef (connection lost)";
+            ERROR("Server error: $error");
             my $message = "Disconnected from " . $self->server . ":" . $self->port . " as " . $self->username;
 
             ERROR("$message Reconnecting...");
