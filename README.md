@@ -6,7 +6,7 @@ Net::Jabber::Bot - Automated Bot creation with safeties
 
 # VERSION
 
-Version 2.1.9
+Version 3.01
 
 # SYNOPSIS
 
@@ -132,7 +132,7 @@ The object at present has the following enforced safeties as long as you do not 
 
     - **alias**
 
-        This will be your nickname in rooms, as well as the login resource (which can't have duplicates). I couldn't come up with any reason these should not be the same so hardcoded them to be the same.
+        This will be your nickname in chat rooms. The XMPP resource (used for login and presence) defaults to `alias_hostname_pid` to ensure uniqueness across multiple bot instances.
 
     - **forums\_and\_responses**
 
