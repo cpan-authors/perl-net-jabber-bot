@@ -89,12 +89,12 @@ $result = $bot->SetForumSubject( $forum_jid, $under_subject );
 ok( !defined $result, "Subject one below max size succeeds" );
 
 # Test 5: SetForumSubject while disconnected
-# Note: SetForumSubject doesn't propagate _send_individual_message's error —
-# it always returns undef for non-oversized subjects. This is existing behavior.
+# _send_individual_message returns "Server is down.\n" when not connected,
+# and SetForumSubject propagates that return value.
 $bot->Disconnect();
 @sent_messages = ();
 $result = $bot->SetForumSubject( $forum_jid, "Should fail" );
-ok( !defined $result, "Returns undef even when disconnected (existing behavior)" );
+like( $result, qr/Server is down/, "Returns error string when disconnected" );
 is( scalar @sent_messages, 0, "No message sent when disconnected" );
 
 exit;

@@ -32,6 +32,7 @@ sub new {
     $self->{username} = undef;
     $self->{password} = undef;
     $self->{resource} = undef;
+    $self->{muc_nicks} = {};
 
     $self->{subscription_log} = [];
     $self->{muc_join_log} = [];
@@ -119,13 +120,22 @@ sub MessageSend { #Loop the messages into the in queue so we can see the server 
     # Log the raw send arguments for test inspection
     push @{$self->{sent_messages_log}}, { %arg_hash };
     my $message = new Net::Jabber::Message();
-    
+
     my $sent_to = $arg_hash{'to'};
-    
+
     my ($forum, $server) = split(/\@/, $sent_to, 2);
     $server =~ s{\/.*$}{}; # Remove the /resource if it came from an individual, not a groupchat
-    
-    my $from = "$forum\@$server/$self->{resource}";
+
+    # In MUC (groupchat), real XMPP servers use the room nickname as the
+    # resource in the from JID, not the XMPP resource. Use the stored MUC
+    # nick when available for groupchat messages to match real behavior.
+    my $from_resource = $self->{resource};
+    if ( ($arg_hash{'type'} || '') eq 'groupchat' ) {
+        my $room_jid = "$forum\@$server";
+        $from_resource = $self->{muc_nicks}{$room_jid} || $from_resource;
+    }
+
+    my $from = "$forum\@$server/$from_resource";
     my $to   = "$self->{username}\@$self->{server}/$self->{resource}";
     DEBUG("$sent_to --- $from --- $to");
     
@@ -144,6 +154,12 @@ sub MUCJoin {
     my $self = shift;
     my %args = @_;
     push @{$self->{muc_join_log}}, \%args;
+    # Track the MUC nickname for each room so MessageSend can use it
+    # in the from JID, matching real XMPP MUC server behavior.
+    my $room   = $args{room}   || '';
+    my $server = $args{server} || '';
+    my $nick   = $args{nick}   || $self->{resource};
+    $self->{muc_nicks}{"$room\@$server"} = $nick;
 }
 
 sub Disconnect {

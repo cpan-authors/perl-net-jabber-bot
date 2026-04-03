@@ -705,9 +705,14 @@ sub _process_jabber_message {
     }
 
     # Are these my own messages?
-    if ( $self->ignore_self_messages ) {    # TODO: || $self->safety_mode (this breaks tests in 06?)
+    if ( $self->ignore_self_messages ) {
 
-        if ( defined $resource && $resource eq $self->resource ) {    # Ignore my own messages.
+        # In MUC (groupchat), the from JID resource is the room nickname (alias),
+        # not the XMPP resource. Check both to handle direct and group messages.
+        if ( defined $resource
+            && ( $resource eq $self->resource
+                || ( $type eq 'groupchat' && $resource eq $self->alias ) ) )
+        {
             DEBUG("Ignoring message from self...\n");
             return;
         }
