@@ -53,7 +53,7 @@ has 'from_full'           => (
     is      => 'rw',
     default => sub {
         my $self = shift;
-        ($self->username || '') . '@' . ($self->server || '') . '/' . ($self->alias || '');
+        ($self->username || '') . '@' . ($self->server || '') . '/' . ($self->resource || '');
     }
 );
 
@@ -240,7 +240,7 @@ password to get into the server
 
 =item B<alias>
 
-This will be your nickname in rooms, as well as the login resource (which can't have duplicates). I couldn't come up with any reason these should not be the same so hardcoded them to be the same.
+This will be your nickname in chat rooms. The XMPP resource (used for login and presence) defaults to C<alias_hostname_pid> to ensure uniqueness across multiple bot instances.
 
 =item B<forums_and_responses>
 
